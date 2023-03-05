@@ -1,21 +1,34 @@
 const route = require("express").Router()
-const { Mongoose, default: mongoose } = require("mongoose");
+const {  default: mongoose } = require("mongoose");
 const Property = require("../models/Property.js");
 
 
-route.get("/",async (req, res) => {
-  const filter = req.query.filter;
+route.post("/",async (req, res) => {
+  const { limit, cat, search } = req.body.filter;
   let query = Property.find()
-  if(filter) {
-    query = Property.find({Category: filter })
+  console.log(search);
+  if(limit) query.limit(limit)
+  if(cat) query = Property.find({category:{ $regex: cat ,$options: "i"} })
+  if(search) {
+    query = Property.find({$or: [
+      {title:{ $regex: search ,$options: "i"}},
+      {description:{ $regex: search ,$options: "i"}},
+      {category:{ $regex: search ,$options: "i"}},
+      {"address.city":{ $regex: search ,$options: "i"}},
+      {"address.area":{ $regex: search ,$options: "i"}},
+  ]})
   }
+
     try {
-      const properties = await query.exec()
+      const properties = await query.exec();
       res.status(200).json(properties)  
     } catch (error) {
+      console.log(error)
       res.status(500).json({message: "internal server error"})  
     }
 })
+
+
 route.put("/:id",async (req, res) => {
   const id = req.params.id;
   console.log({id})
