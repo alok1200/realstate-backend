@@ -4,28 +4,35 @@ const Property = require("../models/Property.js");
 
 
 route.post("/",async (req, res) => {
-  const { limit, cat, search } = req.body.filter;
+  const { limit, cat, search, state } = req.body.filter;
   let query = Property.find()
-  console.log(search);
+  const filter = [];
   if(limit) query.limit(limit)
-  if(cat) query = Property.find({category:{ $regex: cat ,$options: "i"} })
-  if(search) {
-    query = Property.find({$or: [
+  if(cat) filter.push({category:{ $regex: cat ,$options: "i"} })
+  if(search) { filter.push({$or: [
       {title:{ $regex: search ,$options: "i"}},
       {description:{ $regex: search ,$options: "i"}},
       {category:{ $regex: search ,$options: "i"}},
       {"address.city":{ $regex: search ,$options: "i"}},
       {"address.area":{ $regex: search ,$options: "i"}},
-  ]})
+  ]})}
+  if(state){
+    filter.push({"address.city":{ $regex: state ,$options: "i"}},)
   }
+  
+  if(filter.length !== 0){
+    query = query.find({$and : filter})
+  }
+  
 
-    try {
-      const properties = await query.exec();
-      res.status(200).json(properties)  
-    } catch (error) {
-      console.log(error)
-      res.status(500).json({message: "internal server error"})  
-    }
+  try {
+    const properties = await query.exec();
+    res.status(200).json(properties)  
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({message: "internal server error"})  
+  }
+  
 })
 
 
