@@ -1,6 +1,7 @@
 const { createHashWithSault } = require("../helpers/hash");
 const { createJWT } = require("../helpers/token");
 const User = require("../models/User");
+const Seller = require("../models/Seller.js");
 const routes = require("express").Router();
 
 
@@ -36,6 +37,23 @@ routes.post("/register", async (req, res) => {
       return res
         .status(401)
         .json({ message: "user with this email already exist" });
+    }
+    res.status(500).json({ message: "internal server error" });
+  }
+});
+
+
+routes.post("/seller/register", async (req, res) => {
+  try {
+    req.body.password = createHashWithSault(req.body.password)
+    await Seller.create(req.body);
+    res.status(200).json({ message: "register successfull" });
+  } catch (error) {
+    console.log(error)
+    if (error.code === 11000) {
+      return res
+        .status(401)
+        .json({ message: "Seller with this email already exist" });
     }
     res.status(500).json({ message: "internal server error" });
   }

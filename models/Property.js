@@ -17,7 +17,7 @@ const PropertySchema = new mongoose.Schema({
     size: {type: String, require: true},
     category: {type: String, require: true},
     Image: {type: String, require: true},
-})
+},{timestamps: true})
 
 const Property = mongoose.model("Property", PropertySchema)
 
