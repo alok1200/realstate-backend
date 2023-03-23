@@ -23,6 +23,7 @@ route.post("/",async (req, res) => {
   if(filter.length !== 0){
     query = query.find({$and : filter})
   }
+  console.log(filter)
   
 
   try {
